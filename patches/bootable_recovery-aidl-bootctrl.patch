@@ -1,0 +1,54 @@
+diff --git a/Android.mk b/Android.mk
+index 78b9430..fd4ea0d 100755
+--- a/Android.mk
++++ b/Android.mk
+@@ -70,6 +70,9 @@ LOCAL_STATIC_LIBRARIES += libavb \
+                           libtwrpinstall \
+                           update_metadata-protos
+ 
++# Jelly Star: AIDL boot control for Set_Active_Slot (see partitionmanager.cpp)
++LOCAL_STATIC_LIBRARIES += libboot_control_client
++LOCAL_SHARED_LIBRARIES += android.hardware.boot-V1-ndk libbinder_ndk
+ LOCAL_SHARED_LIBRARIES += android.hardware.boot@1.0 \
+                           android.hardware.boot@1.1 \
+                           android.hardware.boot@1.2 \
+diff --git a/partitionmanager.cpp b/partitionmanager.cpp
+index 171fecc..adb74cb 100755
+--- a/partitionmanager.cpp
++++ b/partitionmanager.cpp
+@@ -114,6 +114,7 @@ extern "C" {
+ 
+ #ifdef AB_OTA_UPDATER
+ #include <android/hardware/boot/1.0/IBootControl.h>
++#include <BootControlClient.h>
+ using android::hardware::boot::V1_0::CommandResult;
+ using android::hardware::boot::V1_0::IBootControl;
+ #endif
+@@ -3292,18 +3293,19 @@ void TWPartitionManager::Set_Active_Slot(const string& Slot) {
+ 	LOGINFO("Setting active slot %s\n", Slot.c_str());
+ #ifdef AB_OTA_UPDATER
+ 	if (!Active_Slot_Display.empty()) {
+-		android::sp<IBootControl> module = IBootControl::getService();
++		// Jelly Star: use the AIDL boot-control HAL (with HIDL fallback) via libboot_control_client,
++		// as update_engine_sideload and bootctl do. The HIDL-only getService() found nothing in
++		// recovery (no hwservicemanager, no usable passthrough declaration).
++		auto module = android::hal::BootControlClient::WaitForService();
+ 		if (module == nullptr) {
+ 			LOGERR("Error getting bootctrl module.\n");
+ 		} else {
+-			uint32_t slot_number = 0;
+-			if (Slot == "B")
+-				slot_number = 1;
+-			CommandResult result;
+-			auto ret = module->setActiveBootSlot(slot_number, [&result]
+-					(const CommandResult &cb_result) { result = cb_result; });
+-			if (!ret.isOk() || !result.success)
++			int32_t slot_number = (Slot == "B") ? 1 : 0;
++			const auto result = module->SetActiveBootSlot(slot_number);
++			if (!result.IsOk()) {
++				LOGERR("SetActiveBootSlot(%d) failed: %s\n", slot_number, result.errMsg.c_str());
+ 				gui_msg(Msg(msg::kError, "unable_set_boot_slot=Error changing bootloader boot slot to {1}")(Slot));
++			}
+ 		}
+ 		DataManager::SetValue("tw_active_slot", Slot); // Doing this outside of this if block may result in a seg fault because the DataManager may not be ready yet
+ 	}

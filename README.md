@@ -77,8 +77,8 @@ If the phone is restarting in a loop, enter fastboot with **Volume Up + Power** 
 | Boot, display, touch, USB/adb | **Works** on stock Android 16 |
 | Flash images, backup/restore partitions, NVRAM/NVDATA backup | Should work |
 | adb sideload, Format Data, fastbootd | Should work |
-| Zip install | servicemanager now starts (`servicemanager.ready=true`); needed `task_profiles.json` and a `bootstrap/linker64` link. Installs go to the inactive slot, as on any A/B phone |
-| Slot switching | Should work: same AOSP boot-control HAL as Lineage Recovery |
+| Zip install | Boot control works (`bootctl get-current-slot` answers) after adding `task_profiles.json`, a `bootstrap/linker64` link and recovery VINTF manifests. Installs go to the inactive slot, as on any A/B phone |
+| Slot switching | `bootctl`/fastboot work. TWRP's *Reboot → Slot* button is patched to use the AIDL HAL (`patches/`); untested on device yet |
 | **Decrypting /data** | **Not built in.** It would need MediaTek's TEE-backed KeyMint from the vendor partition, and twrp-14.1's crypto code doesn't link on Android 14 sources (see `BoardConfig.mk`). Internal storage stays encrypted; use adb sideload or a microSD/OTG drive. |
 | Logical partition images (Install Image) | System, System_ext, Product, Vendor, Vendor_dlkm, Odm_dlkm, System_dlkm of the active slot; can't grow them, so use fastbootd for bigger images (GSIs) |
 | MicroSD | **Works** (`mmcblk0p1`) |
@@ -96,4 +96,5 @@ the bootloader, collect the LK log from `expdb` the way the Lineage README descr
 - `kernel/modules.load*`: module load lists (same as the Lineage tree)
 - `scripts/prepare-prebuilts.sh`: extracts kernel/dtb/dtbo/modules from the release images
 - `scripts/transplant-recovery.py`: swaps TWRP's recovery fragment into the release `vendor_boot`
+- `patches/`: small TWRP source patches that `build.sh` applies (and reverts before `repo sync`)
 - `build.sh`, `.github/workflows/build-twrp.yml`: local and CI builds

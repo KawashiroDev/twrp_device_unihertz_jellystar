@@ -21,6 +21,10 @@ PRODUCT_USE_DYNAMIC_PARTITIONS := true
 PRODUCT_PACKAGES += \
     android.hardware.boot-service.default_recovery
 
+# TWRP's Reboot > Slot button is patched to use this same AIDL HAL through
+# libboot_control_client (patches/bootable_recovery-aidl-bootctrl.patch): its HIDL-only lookup
+# found nothing in recovery, which has no hwservicemanager.
+
 PRODUCT_PACKAGES += \
     fastbootd \
     update_engine_sideload

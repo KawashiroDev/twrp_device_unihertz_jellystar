@@ -1,6 +1,9 @@
-<!-- Device manifest for recovery: declares the boot-control HAL so servicemanager starts
-     android.hardware.boot-service.*_recovery for update_engine_sideload. TWRP mounting the real
-     /vendor hides this file, and the stock vendor manifest declares the same HAL. -->
+<!-- Device manifest for recovery. Without a VINTF manifest servicemanager refuses to start the
+     boot-control HAL ("NULL VINTF MANIFEST"), so zip installs failed with "Error initializing the
+     BootControlInterface". Declares the AIDL IBootControl, used by update_engine_sideload, bootctl
+     and (patched) TWRP's Reboot > Slot. Keep it the only VINTF manifest in recovery: adding
+     /system/etc/vintf/manifest.xml makes libvintf load /system/etc/vintf/manifest/*.xml too,
+     which hold device-type fragments, and reject the framework manifest (seen on device). -->
 <manifest version="1.0" type="device" target-level="7">
     <hal format="aidl">
         <name>android.hardware.boot</name>

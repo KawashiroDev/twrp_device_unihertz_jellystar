@@ -51,8 +51,33 @@ while [ "$parent" != / ]; do
   fi
   parent=$(dirname "$parent")
 done
+# Source patches: patches/<path_with_underscores>-*.patch applies to <path> in the source tree
+# (e.g. bootable_recovery-*.patch -> bootable/recovery).
+patch_dir() { local b; b=$(basename "$1"); b=${b%%-*}; echo "$SRC/${b//_//}"; }
+unapply_patches() {
+  for p in "$TREE"/patches/*.patch; do
+    [ -f "$p" ] || continue
+    d=$(patch_dir "$p")
+    [ -d "$d" ] && git -C "$d" apply --reverse --check "$p" 2>/dev/null && git -C "$d" apply --reverse "$p" || true
+  done
+}
+apply_patches() {
+  for p in "$TREE"/patches/*.patch; do
+    [ -f "$p" ] || continue
+    d=$(patch_dir "$p")
+    if git -C "$d" apply --reverse --check "$p" 2>/dev/null; then
+      echo "    already applied: $(basename "$p")"
+    elif git -C "$d" apply --check "$p" 2>/dev/null; then
+      git -C "$d" apply "$p"; echo "    applied: $(basename "$p")"
+    else
+      echo "ERROR: $(basename "$p") doesn't apply to $d (TWRP source changed?)" >&2; exit 1
+    fi
+  done
+}
+
 if [ "${SKIP_SYNC:-0}" != 1 ]; then
   echo "==> syncing TWRP ($TWRP_BRANCH) into $SRC"
+  unapply_patches
   [ -d .repo ] || repo init --depth=1 -u "$MANIFEST" -b "$TWRP_BRANCH"
   repo sync -c -j"$SYNC_JOBS" --no-tags --no-clone-bundle --optimized-fetch --prune --force-sync
 fi
@@ -64,6 +89,9 @@ if [ -n "$nested" ]; then
   echo "  rsync -a '$(dirname "$nested")/' '$TREE/' && rm -rf '$(dirname "$nested")'" >&2
   exit 1
 fi
+
+echo "==> applying source patches"
+apply_patches
 
 echo "==> installing device tree"
 DEV="$SRC/device/unihertz/jellystar"
@@ -80,6 +108,11 @@ export ALLOW_MISSING_DEPENDENCIES=true
 # shellcheck disable=SC1091
 source build/envsetup.sh
 lunch twrp_jellystar-ap2a-eng || lunch twrp_jellystar-eng
+# TWRP copies recovery/root/ into $OUT/recovery/root but never removes files deleted from the
+# tree since the last build, so rebuild the recovery root from scratch, including the
+# timestamps that decide whether it gets repopulated (only recovery files are redone).
+rm -rf "$OUT/recovery" "$OUT/obj/PACKAGING/recovery_intermediates" \
+       "$OUT/obj/FAKE/twrp_ramdisk_intermediates"
 # twrp-14.1's twrp_ramdisk always copies system/etc/task_profiles.json but only depends on
 # it when TW_INCLUDE_CRYPTO is set, so build it first.
 m task_profiles.json -j"$JOBS" || exit 1
@@ -88,6 +121,25 @@ set -eu
 
 TWRP_VB="$OUT/vendor_boot.img"
 [ -f "$TWRP_VB" ] || { echo "build finished but $TWRP_VB is missing" >&2; exit 1; }
+
+# A patched TWRP binary whose libraries aren't in the recovery image would never start (blank
+# screen), so check every NEEDED library of /system/bin/recovery is present before packaging.
+READELF=$(command -v readelf || command -v llvm-readelf || ls "$SRC"/prebuilts/clang/host/linux-x86/*/bin/llvm-readelf 2>/dev/null | head -1)
+RROOT="$OUT/recovery/root"
+if [ -n "$READELF" ] && [ -f "$RROOT/system/bin/recovery" ]; then
+  missing_libs=$("$READELF" -d "$RROOT/system/bin/recovery" | sed -n 's/.*Shared library: \[\(.*\)\]/\1/p' |
+    while read -r lib; do
+      [ -e "$RROOT/system/lib64/$lib" ] || [ -e "$RROOT/system/lib64/bootstrap/$lib" ] || echo "$lib"
+    done)
+  if [ -n "$missing_libs" ]; then
+    echo "ERROR: TWRP needs libraries that aren't in the recovery image:" >&2
+    echo "$missing_libs" | sed 's/^/  /' >&2
+    exit 1
+  fi
+  echo "==> recovery binary's libraries are all present"
+else
+  echo "WARNING: couldn't check TWRP's libraries (no readelf found)" >&2
+fi
 
 echo "==> putting TWRP's recovery fragment into the release vendor_boot"
 mkdir -p "$OUTDIR"

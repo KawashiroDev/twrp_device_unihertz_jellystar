@@ -13,8 +13,9 @@ build time from the `boot.img`, `vendor_boot.img` and `dtbo.img` you supply.
 > until you flash the original `vendor_boot.img` back.
 
 > [!WARNING]
-> **Untested on hardware.** It hasn't been booted on a phone yet. Keep the Lineage release
-> `vendor_boot.img` you built against so you can flash it back.
+> **Early testing.** Boots on stock Android 16 (SELinux is set permissive in recovery only;
+> without that TWRP crash-loops with a blank screen). Keep the original `vendor_boot.img` you
+> built from so you can flash it back.
 
 ## How recovery works on this phone
 

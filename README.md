@@ -78,7 +78,7 @@ If the phone is restarting in a loop, enter fastboot with **Volume Up + Power** 
 | adb sideload, Format Data, fastbootd | Should work |
 | Slot switching | Should work: same AOSP boot-control HAL as Lineage Recovery |
 | **Decrypting /data** | **Not built in.** It would need MediaTek's TEE-backed KeyMint from the vendor partition, and twrp-14.1's crypto code doesn't link on Android 14 sources (see `BoardConfig.mk`). Internal storage stays encrypted; use adb sideload or a microSD/OTG drive. |
-| System Image (Install Image) | Flashes the logical `system` partition of the active slot; can't grow it, so use fastbootd for bigger images (GSIs) |
+| Logical partition images (Install Image) | System, System_ext, Product, Vendor, Vendor_dlkm, Odm_dlkm, System_dlkm of the active slot; can't grow them, so use fastbootd for bigger images (GSIs) |
 | MicroSD | **Works** (`mmcblk0p1`) |
 | USB OTG | Configured (`sdd1`, found on device); can't be wiped from TWRP on purpose. Unplug the PC first: the phone has one USB port |
 

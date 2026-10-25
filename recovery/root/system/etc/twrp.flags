@@ -7,10 +7,17 @@
 /vbmeta_system    emmc    /dev/block/by-name/vbmeta_system     flags=display="VBMeta System";slotselect;backup=1;flashimg=1
 /vbmeta_vendor    emmc    /dev/block/by-name/vbmeta_vendor     flags=display="VBMeta Vendor";slotselect;backup=1;flashimg=1
 
-# Logical partitions inside super, so Install Image can target system alone instead of Super.
+# Logical partitions inside super (names checked on device), so Install Image can target each
+# one instead of all of Super. Mount points end in _image so they don't clash with recovery.fstab.
 # TWRP can't resize logical partitions: an image bigger than the current partition won't fit
 # (use fastbootd for that: `adb reboot fastboot`, `fastboot flash system system.img`).
 /system_image     emmc    /dev/block/mapper/system             flags=display="System Image";slotselect;flashimg=1
+/system_ext_image emmc    /dev/block/mapper/system_ext         flags=display="System_ext Image";slotselect;flashimg=1
+/product_image    emmc    /dev/block/mapper/product            flags=display="Product Image";slotselect;flashimg=1
+/vendor_image     emmc    /dev/block/mapper/vendor             flags=display="Vendor Image";slotselect;flashimg=1
+/vendor_dlkm_imageemmc    /dev/block/mapper/vendor_dlkm        flags=display="Vendor_dlkm Image";slotselect;flashimg=1
+/odm_dlkm_image   emmc    /dev/block/mapper/odm_dlkm           flags=display="Odm_dlkm Image";slotselect;flashimg=1
+/system_dlkm_imageemmc    /dev/block/mapper/system_dlkm        flags=display="System_dlkm Image";slotselect;flashimg=1
 
 # Device-unique calibration / IMEI data — back these up before anything risky.
 /nvram            emmc    /dev/block/by-name/nvram             flags=display="NVRAM";backup=1;flashimg=1

@@ -1,7 +1,17 @@
 # From the stock/Lineage recovery ramdisk. TWRP's own init.recovery.usb.rc reads sys.usb.controller.
 
-# SELinux: init may not setenforce here (tested), so the recovery domain is made permissive in
-# policy instead; see sepolicy/vendor/recovery.te.
+# SELinux: init itself may not setenforce (tested), and every binary in the recovery ramdisk is
+# labelled rootfs, so services such as logd and servicemanager are denied "entrypoint" and never
+# start (zip installs then hang on servicemanager.ready). sepolicy/vendor/recovery.te makes the
+# recovery domain permissive; a permissive domain may setenforce, so run setenforce under that
+# label before anything else starts. Recovery ramdisk only; normal Android boot is unaffected.
+on early-init
+    exec u:r:recovery:s0 root root -- /system/bin/setenforce 0
+    # TWRP copies the system build of servicemanager, whose ELF interpreter is
+    # /system/bin/bootstrap/linker64; recovery only has /system/bin/linker64, so execv failed
+    # with ENOENT and servicemanager never started (seen on device).
+    mkdir /system/bin/bootstrap 0755 root shell
+    symlink /system/bin/linker64 /system/bin/bootstrap/linker64
 
 on init
     setprop sys.usb.configfs 1

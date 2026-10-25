@@ -13,9 +13,10 @@ build time from the `boot.img`, `vendor_boot.img` and `dtbo.img` you supply.
 > until you flash the original `vendor_boot.img` back.
 
 > [!WARNING]
-> **Early testing.** Confirmed booting with a working screen on stock Android 16. SELinux's
-> `recovery` domain is permissive in recovery only; without that TWRP crash-loops with a blank
-> screen. Keep the original `vendor_boot.img` you built from so you can flash it back.
+> **Early testing.** Confirmed booting with a working screen on stock Android 16. SELinux is
+> switched to permissive at the start of recovery (recovery ramdisk only); otherwise TWRP
+> crash-loops with a blank screen and services like servicemanager never start, so zip installs
+> hang. Keep the original `vendor_boot.img` you built from so you can flash it back.
 
 ## How recovery works on this phone
 
@@ -76,6 +77,7 @@ If the phone is restarting in a loop, enter fastboot with **Volume Up + Power** 
 | Boot, display, touch, USB/adb | **Works** on stock Android 16 |
 | Flash images, backup/restore partitions, NVRAM/NVDATA backup | Should work |
 | adb sideload, Format Data, fastbootd | Should work |
+| Zip install | servicemanager now starts (`servicemanager.ready=true`); needed `task_profiles.json` and a `bootstrap/linker64` link. Installs go to the inactive slot, as on any A/B phone |
 | Slot switching | Should work: same AOSP boot-control HAL as Lineage Recovery |
 | **Decrypting /data** | **Not built in.** It would need MediaTek's TEE-backed KeyMint from the vendor partition, and twrp-14.1's crypto code doesn't link on Android 14 sources (see `BoardConfig.mk`). Internal storage stays encrypted; use adb sideload or a microSD/OTG drive. |
 | Logical partition images (Install Image) | System, System_ext, Product, Vendor, Vendor_dlkm, Odm_dlkm, System_dlkm of the active slot; can't grow them, so use fastbootd for bigger images (GSIs) |
@@ -89,8 +91,8 @@ the bootloader, collect the LK log from `expdb` the way the Lineage README descr
 ## Layout
 
 - `BoardConfig.mk`, `device.mk`, `twrp_jellystar.mk`, `AndroidProducts.mk`: device config
-- `recovery/root/`: recovery fstab, `twrp.flags`, USB init
-- `sepolicy/vendor/recovery.te`: makes TWRP's `recovery` SELinux domain permissive (recovery policy only)
+- `recovery/root/`: recovery fstab, `twrp.flags`, USB init, SELinux and linker fixes
+- `sepolicy/vendor/recovery.te` + `recovery/root/init.recovery.mt6789.rc`: permissive `recovery` domain, then `setenforce 0` under it at early-init (recovery only)
 - `kernel/modules.load*`: module load lists (same as the Lineage tree)
 - `scripts/prepare-prebuilts.sh`: extracts kernel/dtb/dtbo/modules from the release images
 - `scripts/transplant-recovery.py`: swaps TWRP's recovery fragment into the release `vendor_boot`

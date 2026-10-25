@@ -30,6 +30,13 @@ PRODUCT_PACKAGES += \
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/recovery/fstab.mt6789:$(TARGET_COPY_OUT_VENDOR_RAMDISK)/first_stage_ramdisk/fstab.mt6789
 
+# libprocessgroup (used by logd, servicemanager, ...) reads /etc/task_profiles.json, and the
+# stock vendor's task_profiles.json aggregates profiles defined there. twrp-14.1 only installs it
+# as task_profiles/task_profiles_30.json, so logd and servicemanager aborted in a restart loop and
+# zip installs hung on servicemanager.ready (seen on device).
+PRODUCT_COPY_FILES += \
+    system/core/libprocessgroup/profiles/task_profiles.json:$(TARGET_COPY_OUT_RECOVERY)/root/system/etc/task_profiles.json
+
 # Soong
 PRODUCT_SOONG_NAMESPACES += \
     $(LOCAL_PATH)

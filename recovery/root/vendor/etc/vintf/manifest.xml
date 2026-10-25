@@ -1,0 +1,9 @@
+<!-- Device manifest for recovery: declares the boot-control HAL so servicemanager starts
+     android.hardware.boot-service.*_recovery for update_engine_sideload. TWRP mounting the real
+     /vendor hides this file, and the stock vendor manifest declares the same HAL. -->
+<manifest version="1.0" type="device" target-level="7">
+    <hal format="aidl">
+        <name>android.hardware.boot</name>
+        <fqname>IBootControl/default</fqname>
+    </hal>
+</manifest>

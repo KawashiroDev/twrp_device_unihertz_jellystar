@@ -1,0 +1,4 @@
+<!-- Minimal framework manifest for recovery. Without any VINTF manifest, servicemanager refuses
+     to start declared AIDL HALs (logged "NULL VINTF MANIFEST"), so zip installs failed with
+     "Error initializing the BootControlInterface". -->
+<manifest version="1.0" type="framework"/>

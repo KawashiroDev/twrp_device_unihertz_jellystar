@@ -15,9 +15,9 @@
 /system_ext_image emmc    /dev/block/mapper/system_ext         flags=display="System_ext Image";slotselect;flashimg=1
 /product_image    emmc    /dev/block/mapper/product            flags=display="Product Image";slotselect;flashimg=1
 /vendor_image     emmc    /dev/block/mapper/vendor             flags=display="Vendor Image";slotselect;flashimg=1
-/vendor_dlkm_imageemmc    /dev/block/mapper/vendor_dlkm        flags=display="Vendor_dlkm Image";slotselect;flashimg=1
+/vendor_dlkm_image emmc    /dev/block/mapper/vendor_dlkm        flags=display="Vendor_dlkm Image";slotselect;flashimg=1
 /odm_dlkm_image   emmc    /dev/block/mapper/odm_dlkm           flags=display="Odm_dlkm Image";slotselect;flashimg=1
-/system_dlkm_imageemmc    /dev/block/mapper/system_dlkm        flags=display="System_dlkm Image";slotselect;flashimg=1
+/system_dlkm_image emmc    /dev/block/mapper/system_dlkm        flags=display="System_dlkm Image";slotselect;flashimg=1
 
 # Device-unique calibration / IMEI data — back these up before anything risky.
 /nvram            emmc    /dev/block/by-name/nvram             flags=display="NVRAM";backup=1;flashimg=1

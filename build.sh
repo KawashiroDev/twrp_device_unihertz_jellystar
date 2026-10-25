@@ -27,6 +27,7 @@ MANIFEST=https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.gi
 for t in repo git python3 lz4 cpio rsync; do
   command -v "$t" >/dev/null || { echo "missing tool: $t" >&2; exit 1; }
 done
+command -v python >/dev/null || echo "WARNING: no 'python' command; some TWRP build scripts expect it (Debian/Ubuntu: sudo apt install python-is-python3)" >&2
 
 mem_kb=$(awk '/MemTotal|SwapTotal/ {s+=$2} END {print s}' /proc/meminfo)
 if [ "$mem_kb" -lt $((15 * 1024 * 1024)) ]; then
@@ -55,7 +56,8 @@ fi
 echo "==> installing device tree"
 DEV="$SRC/device/unihertz/jellystar"
 mkdir -p "$DEV"
-rsync -a --delete --exclude .git --exclude .github --exclude out-twrp "$TREE/" "$DEV/"
+# Paths with ':' (e.g. Windows "file:Zone.Identifier" leftovers) break make rules.
+rsync -a --delete --exclude .git --exclude .github --exclude out-twrp --exclude '*:*' "$TREE/" "$DEV/"
 
 echo "==> extracting kernel, dtb, dtbo, modules from the release images"
 bash "$DEV/scripts/prepare-prebuilts.sh" "$IMAGES" "$SRC/system/tools/mkbootimg"
@@ -65,7 +67,7 @@ set +eu
 export ALLOW_MISSING_DEPENDENCIES=true
 # shellcheck disable=SC1091
 source build/envsetup.sh
-lunch twrp_jellystar-eng || lunch twrp_jellystar-ap2a-eng
+lunch twrp_jellystar-ap2a-eng || lunch twrp_jellystar-eng
 m vendorbootimage -j"$JOBS" || exit 1
 set -eu
 

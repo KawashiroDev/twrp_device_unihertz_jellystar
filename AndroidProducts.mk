@@ -7,4 +7,4 @@ PRODUCT_MAKEFILES := \
     $(LOCAL_DIR)/twrp_jellystar.mk
 
 COMMON_LUNCH_CHOICES := \
-    twrp_jellystar-eng
+    twrp_jellystar-ap2a-eng

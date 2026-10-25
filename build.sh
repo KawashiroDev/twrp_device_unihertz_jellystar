@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 # Build TWRP for the Unihertz Jelly Star.
 #
-#   ./build.sh <dir with the LineageOS release boot.img, vendor_boot.img, dtbo.img>
+#   ./build.sh <dir with boot.img, vendor_boot.img, dtbo.img>
+#
+# The images must be from exactly what's installed on the phone (stock firmware package of the
+# same version, or the matching LineageOS release). The output is that vendor_boot with only
+# its recovery part replaced; images from another OS/version make Android unbootable.
 #
 # Environment (all optional):
 #   SRC=~/twrp            where the TWRP source tree is synced (~25 GB, plus ~20 GB of out/)
@@ -11,7 +15,7 @@
 #   OUTDIR=./out-twrp     where the finished images are copied
 #   SKIP_SYNC=1           don't run repo sync (source already there)
 #
-# Output: $OUTDIR/vendor_boot-twrp.img  (recommended: Lineage's vendor_boot, TWRP recovery)
+# Output: $OUTDIR/vendor_boot-twrp.img  (recommended: your vendor_boot, TWRP recovery)
 #         $OUTDIR/vendor_boot-twrp-standalone.img  (TWRP's own vendor_boot, untested)
 set -euo pipefail
 

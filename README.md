@@ -1,9 +1,16 @@
 # TWRP device tree for the Unihertz Jelly Star
 
-TWRP (`twrp-14.1`) for the Unihertz Jelly Star (MT6789 / Helio G99), built for phones running
+TWRP (`twrp-14.1`) for the Unihertz Jelly Star (MT6789 / Helio G99), for stock Android 16 or
 [osquera's LineageOS](https://github.com/osquera/lineageos_unihertz_jellystar). Board values
-come from that tree. The kernel, dtb, dtbo and modules aren't committed; they're extracted
-from the Lineage release images at build time.
+come from that tree. The kernel, dtb, dtbo and modules aren't committed; they're extracted at
+build time from the `boot.img`, `vendor_boot.img` and `dtbo.img` you supply.
+
+> [!IMPORTANT]
+> **Supply the images of exactly what is installed on your phone**: the stock firmware
+> package's images for stock (same version as *Settings > About phone > Build number*), or
+> the matching LineageOS release's images for Lineage. The TWRP image is that `vendor_boot`
+> with only its recovery part replaced. Images from the other OS make Android unbootable
+> until you flash the original `vendor_boot.img` back.
 
 > [!WARNING]
 > **Untested on hardware.** It hasn't been booted on a phone yet. Keep the Lineage release
@@ -16,12 +23,11 @@ There is no recovery partition. Recovery is a "recovery" ramdisk fragment inside
 
 | File | What it is |
 |---|---|
-| `vendor_boot-twrp.img` | **Use this one.** The Lineage release `vendor_boot` with only its recovery fragment replaced by TWRP. Normal boot is byte-for-byte unchanged. |
+| `vendor_boot-twrp.img` | **Use this one.** Your `vendor_boot` (stock or Lineage) with only its recovery fragment replaced by TWRP. Normal boot is byte-for-byte unchanged. |
 | `vendor_boot-twrp-standalone.img` | TWRP's own `vendor_boot`. Its normal-boot ramdisk is rebuilt and could differ from Lineage's. For debugging only. |
 
-Because the image is derived from a specific Lineage release, **build against the release
-installed on your phone** and rebuild after each Lineage update. An OTA also rewrites
-`vendor_boot`, which puts Lineage Recovery back.
+Because the image is derived from one specific `vendor_boot`, rebuild after every system
+update. An OTA also rewrites `vendor_boot`, which puts the stock or Lineage recovery back.
 
 ## Building
 
@@ -30,7 +36,8 @@ installed on your phone** and rebuild after each Lineage update. An OTA also rew
 1. Push this directory to a GitHub repository of your own.
 2. Go to *Actions > Build TWRP > Run workflow* and enter the Lineage release tag on your phone
    (blank = latest).
-3. Wait about 2–3 hours, then download the `twrp-jellystar-…` artifact.
+3. Wait about 2–3 hours, then download the `twrp-jellystar-…` artifact. The workflow uses
+   LineageOS release images, so it's for Lineage phones only; for stock, build locally.
 
 ### Locally
 
@@ -40,11 +47,11 @@ Needs Ubuntu/Debian with the usual Android build packages, plus `repo`, `lz4`, `
 - **Memory:** 16 GB RAM + swap. On 8 GB, add 16 GB of swap first:
   `sudo fallocate -l 16G /swapfile && sudo chmod 600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile`
 
-Download `boot.img`, `vendor_boot.img` and `dtbo.img` from the Lineage release on your phone
-into a folder, then run:
+Put `boot.img`, `vendor_boot.img` and `dtbo.img` for what's on your phone into a folder
+(stock: the firmware package's `images/` folder; Lineage: the release downloads), then run:
 
 ```sh
-JOBS=4 ./build.sh ~/Downloads/lineage-release
+JOBS=4 ./build.sh ~/Downloads/jellystar-images
 ```
 
 Images land in `out-twrp/`. `SRC=` changes where the source is synced (default `~/twrp`), and
@@ -58,13 +65,14 @@ fastboot flash vendor_boot vendor_boot-twrp.img   # current slot only
 fastboot reboot recovery
 ```
 
-To go back, flash the release `vendor_boot.img` the same way.
+To go back, flash the original `vendor_boot.img` (the one you built from) the same way.
+If the phone is restarting in a loop, enter fastboot with **Volume Up + Power** first.
 
 ## Status
 
 | Feature | Expected |
 |---|---|
-| Boot, display, touch, USB/adb | Should work: same kernel modules and USB setup as Lineage Recovery |
+| Boot, display, touch, USB/adb | Should work: same kernel modules and USB setup as stock/Lineage recovery |
 | Flash images, backup/restore partitions, NVRAM/NVDATA backup | Should work |
 | adb sideload, Format Data, fastbootd | Should work |
 | Slot switching | Should work: same AOSP boot-control HAL as Lineage Recovery |

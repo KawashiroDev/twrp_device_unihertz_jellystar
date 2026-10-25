@@ -1,9 +1,10 @@
-# TWRP recovery fstab for the Unihertz Jelly Star (LineageOS layout:
-# ext4 system/system_ext/product, stock EROFS vendor-side images).
+# TWRP recovery fstab for the Unihertz Jelly Star.
+# Stock Android 16 uses EROFS for everything below. LineageOS builds system/system_ext/product
+# as ext4; on Lineage, change those three lines to "ext4  ro,barrier=1".
 #<src>                                    <mnt_point>   <type>  <mnt_flags>                                   <fs_mgr_flags>
-system                                    /system       ext4    ro,barrier=1                                  wait,slotselect,logical,first_stage_mount
-system_ext                                /system_ext   ext4    ro,barrier=1                                  wait,slotselect,logical,first_stage_mount
-product                                   /product      ext4    ro,barrier=1                                  wait,slotselect,logical,first_stage_mount
+system                                    /system       erofs   ro                                            wait,slotselect,logical,first_stage_mount
+system_ext                                /system_ext   erofs   ro                                            wait,slotselect,logical,first_stage_mount
+product                                   /product      erofs   ro                                            wait,slotselect,logical,first_stage_mount
 vendor                                    /vendor       erofs   ro                                            wait,slotselect,logical,first_stage_mount
 vendor_dlkm                               /vendor_dlkm  erofs   ro                                            wait,slotselect,logical,first_stage_mount
 odm_dlkm                                  /odm_dlkm     erofs   ro                                            wait,slotselect,logical,first_stage_mount

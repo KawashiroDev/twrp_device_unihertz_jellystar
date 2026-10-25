@@ -19,6 +19,6 @@
 # Internal storage is UFS (sdX), so the microSD slot is mmcblk0, not mmcblk1 (checked on device).
 # The type is only used for wiping; TWRP detects the real filesystem (FAT32/exFAT) when mounting.
 /external_sd      vfat    /dev/block/mmcblk0p1 /dev/block/mmcblk0   flags=display="MicroSD";storage;wipeingui;removable
-# No USB OTG entry: internal UFS storage occupies sda/sdb/sdc..., so a guessed sdX path could
-# point TWRP's "Wipe" at an internal partition. Add one only after checking the real device
-# node with a drive plugged in.
+# USB OTG: internal UFS uses sda, sdb and sdc, so a USB drive appears as sdd (checked on device).
+# No "wipeingui": if the UFS layout ever changed, a wipe from TWRP could hit an internal disk.
+/usb_otg          vfat    /dev/block/sdd1 /dev/block/sdd            flags=display="USB OTG";storage;removable

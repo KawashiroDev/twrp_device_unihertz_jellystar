@@ -57,6 +57,14 @@ if [ "${SKIP_SYNC:-0}" != 1 ]; then
   repo sync -c -j"$SYNC_JOBS" --no-tags --no-clone-bundle --optimized-fetch --prune --force-sync
 fi
 
+nested=$(find "$TREE" -mindepth 2 -name AndroidProducts.mk -not -path '*/.git/*' | head -1)
+if [ -n "$nested" ]; then
+  echo "ERROR: found a second copy of the tree at $(dirname "$nested")" >&2
+  echo "(a zip extracted inside this folder?). Move its files up and delete it:" >&2
+  echo "  rsync -a '$(dirname "$nested")/' '$TREE/' && rm -rf '$(dirname "$nested")'" >&2
+  exit 1
+fi
+
 echo "==> installing device tree"
 DEV="$SRC/device/unihertz/jellystar"
 mkdir -p "$DEV"

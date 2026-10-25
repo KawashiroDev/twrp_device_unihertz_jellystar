@@ -48,7 +48,7 @@ mkdir -p "$DEV"
 rsync -a --delete --exclude .git --exclude .github --exclude out-twrp "$TREE/" "$DEV/"
 
 echo "==> extracting kernel, dtb, dtbo, modules from the release images"
-"$DEV/scripts/prepare-prebuilts.sh" "$IMAGES" "$SRC/system/tools/mkbootimg"
+bash "$DEV/scripts/prepare-prebuilts.sh" "$IMAGES" "$SRC/system/tools/mkbootimg"
 
 echo "==> building vendorbootimage (this takes a while)"
 set +eu

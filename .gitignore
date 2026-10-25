@@ -1,0 +1,7 @@
+out-twrp/
+kernel/Image.lz4
+kernel/dtbo.img
+kernel/dtb/
+kernel/modules/
+*.img
+__pycache__/

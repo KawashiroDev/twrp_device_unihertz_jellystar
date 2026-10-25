@@ -1,0 +1,102 @@
+name: Build TWRP
+
+on:
+  workflow_dispatch:
+    inputs:
+      lineage_tag:
+        description: "LineageOS release tag to take boot/vendor_boot/dtbo from (match what's on your phone; blank = latest)"
+        required: false
+        default: ""
+      twrp_branch:
+        description: "TWRP minimal-manifest branch"
+        required: true
+        default: "twrp-14.1"
+      publish_release:
+        description: "Publish the images as a GitHub release"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      # Hosted runners have ~14 GB free; this pools / and /mnt (~60 GB+) and adds swap.
+      - name: Maximize build space
+        uses: easimon/maximize-build-space@v10
+        with:
+          root-reserve-mb: 6144
+          swap-size-mb: 16384
+          remove-dotnet: "true"
+          remove-android: "true"
+          remove-haskell: "true"
+          remove-codeql: "true"
+          remove-docker-images: "true"
+
+      - name: Check out device tree
+        uses: actions/checkout@v4
+        with:
+          path: tree
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q git-core gnupg flex bison build-essential zip curl \
+            zlib1g-dev libc6-dev-i386 x11proto-core-dev libx11-dev lib32z1-dev \
+            libgl1-mesa-dev libxml2-utils xsltproc unzip fontconfig python3 \
+            lz4 cpio rsync bc
+          mkdir -p ~/bin
+          curl -fsSL https://storage.googleapis.com/git-repo-downloads/repo -o ~/bin/repo
+          chmod +x ~/bin/repo
+          echo "$HOME/bin" >> "$GITHUB_PATH"
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@users.noreply.github.com"
+
+      - name: Download LineageOS release images
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.lineage_tag }}
+        run: |
+          mkdir -p images
+          gh release download $TAG -R osquera/lineageos_unihertz_jellystar \
+            -p boot.img -p vendor_boot.img -p dtbo.img -D images
+          used=${TAG:-$(gh release view -R osquera/lineageos_unihertz_jellystar --json tagName -q .tagName)}
+          echo "LINEAGE_TAG=$used" >> "$GITHUB_ENV"
+          ls -l images
+
+      - name: Sync and build
+        env:
+          SRC: ${{ github.workspace }}/twrp
+          TWRP_BRANCH: ${{ inputs.twrp_branch }}
+          OUTDIR: ${{ github.workspace }}/out-twrp
+        run: |
+          free -h; df -h "$GITHUB_WORKSPACE"
+          JOBS=$(nproc) bash tree/build.sh images
+
+      - name: Upload images
+        uses: actions/upload-artifact@v4
+        with:
+          name: twrp-jellystar-${{ env.LINEAGE_TAG }}
+          path: out-twrp/*
+
+      - name: Upload build log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: twrp/out/error.log
+          if-no-files-found: ignore
+
+      - name: Publish release
+        if: inputs.publish_release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: twrp-${{ env.LINEAGE_TAG }}-${{ github.run_number }}
+          name: TWRP for Jelly Star (for LineageOS ${{ env.LINEAGE_TAG }})
+          body: |
+            Built against LineageOS release `${{ env.LINEAGE_TAG }}` (TWRP `${{ inputs.twrp_branch }}`).
+            Only flash this on a phone running that LineageOS release. See README.md.
+          files: out-twrp/*

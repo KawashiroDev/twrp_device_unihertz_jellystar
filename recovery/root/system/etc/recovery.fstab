@@ -1,0 +1,18 @@
+# TWRP recovery fstab for the Unihertz Jelly Star (LineageOS layout:
+# ext4 system/system_ext/product, stock EROFS vendor-side images).
+#<src>                                    <mnt_point>   <type>  <mnt_flags>                                   <fs_mgr_flags>
+system                                    /system       ext4    ro,barrier=1                                  wait,slotselect,logical,first_stage_mount
+system_ext                                /system_ext   ext4    ro,barrier=1                                  wait,slotselect,logical,first_stage_mount
+product                                   /product      ext4    ro,barrier=1                                  wait,slotselect,logical,first_stage_mount
+vendor                                    /vendor       erofs   ro                                            wait,slotselect,logical,first_stage_mount
+vendor_dlkm                               /vendor_dlkm  erofs   ro                                            wait,slotselect,logical,first_stage_mount
+odm_dlkm                                  /odm_dlkm     erofs   ro                                            wait,slotselect,logical,first_stage_mount
+system_dlkm                               /system_dlkm  erofs   ro                                            wait,slotselect,logical,first_stage_mount
+
+/dev/block/by-name/metadata               /metadata     ext4    noatime,nosuid,nodev,discard                  wait,check,formattable,first_stage_mount
+/dev/block/by-name/userdata               /data         f2fs    noatime,nosuid,nodev,discard,noflush_merge,fsync_mode=nobarrier,reserve_root=134217,resgid=1065,inlinecrypt wait,check,formattable,quota,latemount,resize,reservedsize=128m,checkpoint=fs,fileencryption=aes-256-xts:aes-256-cts:v2+inlinecrypt_optimized,keydirectory=/metadata/vold/metadata_encryption,fsverity
+
+/dev/block/by-name/misc                   /misc         emmc    defaults                                      defaults
+/dev/block/by-name/boot                   /boot         emmc    defaults                                      slotselect
+/dev/block/by-name/vendor_boot            /vendor_boot  emmc    defaults                                      slotselect
+/dev/block/by-name/dtbo                   /dtbo         emmc    defaults                                      slotselect

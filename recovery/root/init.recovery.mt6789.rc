@@ -1,14 +1,9 @@
 # From the stock/Lineage recovery ramdisk. TWRP's own init.recovery.usb.rc reads sys.usb.controller.
 
-# The SELinux policy loaded in recovery doesn't cover TWRP: every mkdir in /, property set and
-# sysfs write is denied, and TWRP aborts reading /etc/additional.fstab in a restart loop with a
-# blank screen (confirmed on hardware: `setenforce 0` makes TWRP come up). Go permissive before
-# TWRP starts. This file is only in the recovery ramdisk, so normal Android boot is unaffected.
-on early-init
-    write /sys/fs/selinux/enforce 0
+# SELinux: init may not setenforce here (tested), so the recovery domain is made permissive in
+# policy instead; see sepolicy/vendor/recovery.te.
 
 on init
-    write /sys/fs/selinux/enforce 0
     setprop sys.usb.configfs 1
     setprop sys.usb.controller "musb-hdrc"
     setprop sys.usb.ffs.aio_compat 0

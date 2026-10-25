@@ -1,0 +1,7 @@
+# TWRP runs in the recovery domain. The recovery policy denies it most of what it needs
+# (mkdir in /, its own properties, backlight sysfs, vndbinder), which made TWRP abort in a
+# restart loop with a blank screen. init isn't allowed to setenforce either, so make the
+# recovery domain permissive. recovery_only() keeps this out of any non-recovery policy.
+recovery_only(`
+permissive recovery;
+')

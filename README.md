@@ -88,6 +88,7 @@ the bootloader, collect the LK log from `expdb` the way the Lineage README descr
 
 - `BoardConfig.mk`, `device.mk`, `twrp_jellystar.mk`, `AndroidProducts.mk`: device config
 - `recovery/root/`: recovery fstab, `twrp.flags`, USB init
+- `sepolicy/vendor/recovery.te`: makes TWRP's `recovery` SELinux domain permissive (recovery policy only)
 - `kernel/modules.load*`: module load lists (same as the Lineage tree)
 - `scripts/prepare-prebuilts.sh`: extracts kernel/dtb/dtbo/modules from the release images
 - `scripts/transplant-recovery.py`: swaps TWRP's recovery fragment into the release `vendor_boot`

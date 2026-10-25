@@ -125,6 +125,10 @@ BOARD_INCLUDE_RECOVERY_RAMDISK_IN_VENDOR_BOOT := true
 TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/recovery/root/system/etc/recovery.fstab
 TARGET_RECOVERY_PIXEL_FORMAT := BGRA_8888
 TARGET_USES_MKE2FS := true
+
+# SELinux: make TWRP's recovery domain permissive (sepolicy/vendor/recovery.te). Vendor policy
+# here only ends up in the recovery ramdisk's policy; normal boot keeps the stock policy.
+BOARD_VENDOR_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy/vendor
 BOARD_RAMDISK_USE_LZ4 := true
 
 # Spoofed high version/patch level so KeyMint never refuses recovery for rollback

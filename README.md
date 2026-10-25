@@ -68,7 +68,7 @@ To go back, flash the release `vendor_boot.img` the same way.
 | Flash images, backup/restore partitions, NVRAM/NVDATA backup | Should work |
 | adb sideload, Format Data, fastbootd | Should work |
 | Slot switching | Should work: same AOSP boot-control HAL as Lineage Recovery |
-| **Decrypting /data** | **Expected not to work.** It needs MediaTek's TEE-backed KeyMint from the vendor partition, which isn't wired up yet. Internal storage stays encrypted; use adb sideload or a microSD/OTG drive. |
+| **Decrypting /data** | **Not built in.** It would need MediaTek's TEE-backed KeyMint from the vendor partition, and twrp-14.1's crypto code doesn't link on Android 14 sources (see `BoardConfig.mk`). Internal storage stays encrypted; use adb sideload or a microSD/OTG drive. |
 | MicroSD, USB OTG | Probably; untested |
 
 If the screen stays black but adb works, check brightness (`TW_BRIGHTNESS_PATH` in

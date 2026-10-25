@@ -160,12 +160,14 @@ TW_EXCLUDE_APEX := true
 TW_LOAD_VENDOR_BOOT_MODULES := true
 TW_BACKUP_EXCLUSIONS := /data/fonts
 
-# Decryption. Built in, but it needs MediaTek's TEE-backed KeyMint from the vendor partition,
-# which isn't wired up here yet, so expect /data to stay encrypted (Format Data still works).
-TW_INCLUDE_CRYPTO := true
-TW_INCLUDE_CRYPTO_FBE := true
-TW_INCLUDE_FBE_METADATA_DECRYPT := true
-TW_USE_FSCRYPT_POLICY := 2
+# Decryption: off. It would need MediaTek's TEE-backed KeyMint from the vendor partition,
+# which isn't wired up, and twrp-14.1's crypto path doesn't even link: libtar asks for the
+# Android 12 names *-ndk_platform (android.security.apc-ndk_platform etc.), which Android 13+
+# renamed to *-ndk. /data stays encrypted; Format Data, sideload and partition backups work.
+# TW_INCLUDE_CRYPTO := true
+# TW_INCLUDE_CRYPTO_FBE := true
+# TW_INCLUDE_FBE_METADATA_DECRYPT := true
+# TW_USE_FSCRYPT_POLICY := 2
 
 # Debug
 TARGET_USES_LOGD := true

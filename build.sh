@@ -5,7 +5,8 @@
 #
 # Environment (all optional):
 #   SRC=~/twrp            where the TWRP source tree is synced (~25 GB, plus ~20 GB of out/)
-#   JOBS=4                parallel jobs; keep low on an 8 GB machine
+#   JOBS=4                parallel build jobs (about 2 GB RAM each)
+#   SYNC_JOBS=4           parallel downloads; Google rate-limits (HTTP 429) above ~4
 #   TWRP_BRANCH=twrp-14.1 minimal-manifest branch
 #   OUTDIR=./out-twrp     where the finished images are copied
 #   SKIP_SYNC=1           don't run repo sync (source already there)
@@ -18,6 +19,7 @@ TREE=$(cd "$(dirname "$0")" && pwd)
 IMAGES=$(realpath "${1:?usage: $0 <dir with boot.img vendor_boot.img dtbo.img>}")
 SRC=${SRC:-$HOME/twrp}
 JOBS=${JOBS:-4}
+SYNC_JOBS=${SYNC_JOBS:-4}
 TWRP_BRANCH=${TWRP_BRANCH:-twrp-14.1}
 OUTDIR=$(realpath -m "${OUTDIR:-$TREE/out-twrp}")
 MANIFEST=https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git
@@ -37,7 +39,7 @@ cd "$SRC"
 if [ "${SKIP_SYNC:-0}" != 1 ]; then
   echo "==> syncing TWRP ($TWRP_BRANCH) into $SRC"
   [ -d .repo ] || repo init --depth=1 -u "$MANIFEST" -b "$TWRP_BRANCH"
-  repo sync -c -j"$JOBS" --no-tags --no-clone-bundle --optimized-fetch --prune --force-sync
+  repo sync -c -j"$SYNC_JOBS" --no-tags --no-clone-bundle --optimized-fetch --prune --force-sync
 fi
 
 echo "==> installing device tree"

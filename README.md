@@ -78,7 +78,7 @@ If the phone is restarting in a loop, enter fastboot with **Volume Up + Power** 
 | Flash images, backup/restore partitions, NVRAM/NVDATA backup | Should work |
 | adb sideload, Format Data, fastbootd | Should work |
 | Zip install | Boot control works (`bootctl get-current-slot` answers) after adding `task_profiles.json`, a `bootstrap/linker64` link and recovery VINTF manifests. Installs go to the inactive slot, as on any A/B phone |
-| Slot switching | `bootctl`/fastboot work. TWRP's *Reboot → Slot* button is patched to use the AIDL HAL (`patches/`); untested on device yet |
+| Slot switching | `bootctl`/fastboot work. TWRP's *Reboot → Slot* button is patched to use the AIDL HAL (`patches/`); **Works** |
 | **Decrypting /data** | **Not built in.** It would need MediaTek's TEE-backed KeyMint from the vendor partition, and twrp-14.1's crypto code doesn't link on Android 14 sources (see `BoardConfig.mk`). Internal storage stays encrypted; use adb sideload or a microSD/OTG drive. |
 | Logical partition images (Install Image) | System, System_ext, Product, Vendor, Vendor_dlkm, Odm_dlkm, System_dlkm of the active slot; can't grow them, so use fastbootd for bigger images (GSIs) |
 | MicroSD | **Works** (`mmcblk0p1`) |

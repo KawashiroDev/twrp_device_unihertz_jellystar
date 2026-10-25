@@ -7,6 +7,11 @@
 /vbmeta_system    emmc    /dev/block/by-name/vbmeta_system     flags=display="VBMeta System";slotselect;backup=1;flashimg=1
 /vbmeta_vendor    emmc    /dev/block/by-name/vbmeta_vendor     flags=display="VBMeta Vendor";slotselect;backup=1;flashimg=1
 
+# Logical partitions inside super, so Install Image can target system alone instead of Super.
+# TWRP can't resize logical partitions: an image bigger than the current partition won't fit
+# (use fastbootd for that: `adb reboot fastboot`, `fastboot flash system system.img`).
+/system_image     emmc    /dev/block/mapper/system             flags=display="System Image";slotselect;flashimg=1
+
 # Device-unique calibration / IMEI data — back these up before anything risky.
 /nvram            emmc    /dev/block/by-name/nvram             flags=display="NVRAM";backup=1;flashimg=1
 /nvdata           ext4    /dev/block/by-name/nvdata            flags=display="NVDATA";backup=1

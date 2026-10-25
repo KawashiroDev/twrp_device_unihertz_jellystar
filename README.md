@@ -13,9 +13,9 @@ build time from the `boot.img`, `vendor_boot.img` and `dtbo.img` you supply.
 > until you flash the original `vendor_boot.img` back.
 
 > [!WARNING]
-> **Early testing.** Boots on stock Android 16 (SELinux is set permissive in recovery only;
-> without that TWRP crash-loops with a blank screen). Keep the original `vendor_boot.img` you
-> built from so you can flash it back.
+> **Early testing.** Confirmed booting with a working screen on stock Android 16. SELinux's
+> `recovery` domain is permissive in recovery only; without that TWRP crash-loops with a blank
+> screen. Keep the original `vendor_boot.img` you built from so you can flash it back.
 
 ## How recovery works on this phone
 
@@ -73,7 +73,7 @@ If the phone is restarting in a loop, enter fastboot with **Volume Up + Power** 
 
 | Feature | Expected |
 |---|---|
-| Boot, display, touch, USB/adb | Should work: same kernel modules and USB setup as stock/Lineage recovery |
+| Boot, display, touch, USB/adb | **Works** on stock Android 16 |
 | Flash images, backup/restore partitions, NVRAM/NVDATA backup | Should work |
 | adb sideload, Format Data, fastbootd | Should work |
 | Slot switching | Should work: same AOSP boot-control HAL as Lineage Recovery |

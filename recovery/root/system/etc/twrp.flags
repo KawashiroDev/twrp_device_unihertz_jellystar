@@ -16,5 +16,9 @@
 /persist          ext4    /dev/block/by-name/persist           flags=display="Persist";backup=1
 /proinfo          emmc    /dev/block/by-name/proinfo           flags=display="Proinfo";backup=1;flashimg=1
 
-/external_sd      auto    /dev/block/mmcblk1p1 /dev/block/mmcblk1   flags=display="MicroSD";storage;wipeingui;removable
-/usb_otg          auto    /dev/block/sda1 /dev/block/sda            flags=display="USB OTG";storage;wipeingui;removable
+# Internal storage is UFS (sdX), so the microSD slot is mmcblk0, not mmcblk1 (checked on device).
+# The type is only used for wiping; TWRP detects the real filesystem (FAT32/exFAT) when mounting.
+/external_sd      vfat    /dev/block/mmcblk0p1 /dev/block/mmcblk0   flags=display="MicroSD";storage;wipeingui;removable
+# No USB OTG entry: internal UFS storage occupies sda/sdb/sdc..., so a guessed sdX path could
+# point TWRP's "Wipe" at an internal partition. Add one only after checking the real device
+# node with a drive plugged in.

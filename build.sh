@@ -68,6 +68,9 @@ export ALLOW_MISSING_DEPENDENCIES=true
 # shellcheck disable=SC1091
 source build/envsetup.sh
 lunch twrp_jellystar-ap2a-eng || lunch twrp_jellystar-eng
+# twrp-14.1's twrp_ramdisk always copies system/etc/task_profiles.json but only depends on
+# it when TW_INCLUDE_CRYPTO is set, so build it first.
+m task_profiles.json -j"$JOBS" || exit 1
 m vendorbootimage -j"$JOBS" || exit 1
 set -eu
 

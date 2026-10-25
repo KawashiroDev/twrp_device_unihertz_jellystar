@@ -36,6 +36,16 @@ fi
 
 mkdir -p "$SRC"
 cd "$SRC"
+# repo searches parent directories for .repo; refuse to run inside another checkout.
+parent=$(dirname "$PWD")
+while [ "$parent" != / ]; do
+  if [ -d "$parent/.repo" ]; then
+    echo "ERROR: $parent already has a .repo (another source checkout)." >&2
+    echo "repo would use that instead of $SRC. Pick a SRC outside $parent." >&2
+    exit 1
+  fi
+  parent=$(dirname "$parent")
+done
 if [ "${SKIP_SYNC:-0}" != 1 ]; then
   echo "==> syncing TWRP ($TWRP_BRANCH) into $SRC"
   [ -d .repo ] || repo init --depth=1 -u "$MANIFEST" -b "$TWRP_BRANCH"

@@ -57,7 +57,7 @@ echo "==> installing device tree"
 DEV="$SRC/device/unihertz/jellystar"
 mkdir -p "$DEV"
 # Paths with ':' (e.g. Windows "file:Zone.Identifier" leftovers) break make rules.
-rsync -a --delete --exclude .git --exclude .github --exclude out-twrp --exclude '*:*' "$TREE/" "$DEV/"
+rsync -a --delete --delete-excluded --exclude .git --exclude .github --exclude out-twrp --exclude '*:*' "$TREE/" "$DEV/"
 
 echo "==> extracting kernel, dtb, dtbo, modules from the release images"
 bash "$DEV/scripts/prepare-prebuilts.sh" "$IMAGES" "$SRC/system/tools/mkbootimg"
